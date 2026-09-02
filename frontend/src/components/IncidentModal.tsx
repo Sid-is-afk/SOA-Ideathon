@@ -3,6 +3,7 @@ import { DeliveryRoute, Shipment, IncidentType, IncidentSeverity, IncidentReport
 import { dataService } from '../services/dataService';
 import { AlertTriangle, X, ShieldAlert, CheckCircle2 } from 'lucide-react';
 import { explanationService } from '../services/explanationService';
+import { useLanguage } from '../contexts/LanguageContext';
 
 interface IncidentModalProps {
   isOpen: boolean;
@@ -15,12 +16,6 @@ interface IncidentModalProps {
   variant?: 'driver' | 'admin';
 }
 
-const DRIVER_TYPES: { value: IncidentType; label: string }[] = [
-  { value: 'vehicle_breakdown', label: 'Vehicle Breakdown' },
-  { value: 'temperature_excursion', label: 'Spoilage Risk' },
-  { value: 'traffic_delay', label: 'Delay' },
-];
-
 export const IncidentModal: React.FC<IncidentModalProps> = ({
   isOpen,
   onClose,
@@ -31,6 +26,7 @@ export const IncidentModal: React.FC<IncidentModalProps> = ({
   onIncidentSubmitted,
   variant = 'admin',
 }) => {
+  const { t } = useLanguage();
   const isDriver = variant === 'driver';
   const [selectedRouteId, setSelectedRouteId] = useState(preselectedRouteId || (routes[0]?.id ?? ''));
   const [selectedShipmentId, setSelectedShipmentId] = useState(preselectedShipmentId || (shipments[0]?.id ?? ''));
@@ -133,29 +129,35 @@ export const IncidentModal: React.FC<IncidentModalProps> = ({
     }
   };
 
+  const DRIVER_TYPES: { value: IncidentType; label: string }[] = [
+    { value: 'vehicle_breakdown', label: t('incident.typeBreakdown', 'Vehicle Breakdown') },
+    { value: 'temperature_excursion', label: t('incident.typeExcursion', 'Spoilage Risk / Thermal Excursion') },
+    { value: 'traffic_delay', label: t('incident.typeTraffic', 'Traffic Delay') },
+  ];
+
   return (
     <div className="fixed inset-0 z-[2000] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-      <div className="bg-[#FFFFFF] border border-[#D6DCD4] rounded-[6px] w-full max-w-lg shadow-xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+      <div className="bg-[#FFFFFF] border border-[#D6DCD4] rounded-2xl w-full max-w-lg shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
         <div className="bg-[#B3462C] text-[#FFFFFF] px-5 py-4 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <ShieldAlert className="w-5 h-5" />
             <div>
               <h3 className="font-display font-bold text-base">
-                {isDriver ? 'Report Incident' : 'Report Mid-Transit Incident'}
+                {isDriver ? t('driver.reportIncident', 'Report Incident') : t('incident.modalTitle', 'Report Mid-Transit Incident')}
               </h3>
               <span className="font-mono text-[11px] text-white/80">
                 {isDriver
                   ? currentRoute
                     ? `${currentRoute.code || currentRoute.id} · ${currentRoute.vehicleId || 'Vehicle pending'}`
                     : 'Active route will be tagged automatically'
-                  : 'Disruption Logging & Automated Route Re-Optimization'}
+                  : t('incident.subTitle', 'Disruption Logging & Automated Route Re-Optimization')}
               </span>
             </div>
           </div>
           <button
             type="button"
             onClick={onClose}
-            className="text-white/80 hover:text-white p-1 rounded hover:bg-black/10 transition-colors"
+            className="text-white/80 hover:text-white p-1.5 rounded-lg hover:bg-black/10 transition-colors cursor-pointer"
           >
             <X className="w-5 h-5" />
           </button>
@@ -167,10 +169,10 @@ export const IncidentModal: React.FC<IncidentModalProps> = ({
               <CheckCircle2 className="w-7 h-7" />
             </div>
             <h4 className="font-display font-bold text-lg text-[#163832]">
-              Incident Logged Successfully
+              {t('incident.successTitle', 'Incident Logged Successfully')}
             </h4>
             <p className="text-xs text-[#596560] max-w-sm mx-auto leading-relaxed">
-              Disruption telemetry broadcasted to Central Operations. The report now appears in the Admin Incident Inbox.
+              {t('incident.successSub', 'Disruption telemetry broadcasted to Central Operations. Telemetry rerouting initiated.')}
             </p>
           </div>
         ) : (
@@ -216,12 +218,12 @@ export const IncidentModal: React.FC<IncidentModalProps> = ({
             <div className={isDriver ? '' : 'grid grid-cols-1 sm:grid-cols-2 gap-3'}>
               <div>
                 <label className="block font-mono text-[11px] font-bold text-[#163832] uppercase mb-1">
-                  Incident Type
+                  {t('incident.incidentType', 'Incident Type')}
                 </label>
                 <select
                   value={type}
                   onChange={(e) => setType(e.target.value as IncidentType)}
-                  className="w-full bg-[#F3F5F2] border border-[#D6DCD4] rounded px-3 py-2 text-xs focus:outline-none focus:border-[#163832]"
+                  className="w-full bg-[#F3F5F2] border border-[#D6DCD4] rounded-lg px-3 py-2.5 text-xs focus:outline-none focus:border-[#163832]"
                   required
                 >
                   {isDriver ? (
@@ -230,11 +232,11 @@ export const IncidentModal: React.FC<IncidentModalProps> = ({
                     ))
                   ) : (
                     <>
-                      <option value="temperature_excursion">Spoilage Risk (Thermal Spike)</option>
-                      <option value="vehicle_breakdown">Vehicle Breakdown</option>
-                      <option value="traffic_delay">Delay</option>
-                      <option value="weather_delay">Weather Delay</option>
-                      <option value="hub_congestion">Hub Congestion</option>
+                      <option value="temperature_excursion">{t('incident.typeExcursion', 'Spoilage Risk (Thermal Spike)')}</option>
+                      <option value="vehicle_breakdown">{t('incident.typeBreakdown', 'Vehicle Breakdown')}</option>
+                      <option value="traffic_delay">{t('incident.typeTraffic', 'Delay')}</option>
+                      <option value="weather_delay">{t('incident.typeWeather', 'Weather Delay')}</option>
+                      <option value="hub_congestion">{t('incident.typeCongestion', 'Hub Congestion')}</option>
                     </>
                   )}
                 </select>
@@ -243,16 +245,16 @@ export const IncidentModal: React.FC<IncidentModalProps> = ({
               {!isDriver && (
                 <div>
                   <label className="block font-mono text-[11px] font-bold text-[#163832] uppercase mb-1">
-                    Severity Level
+                    {t('incident.severity', 'Severity Level')}
                   </label>
                   <select
                     value={severity}
                     onChange={(e) => setSeverity(e.target.value as IncidentSeverity)}
-                    className="w-full bg-[#F3F5F2] border border-[#D6DCD4] rounded px-3 py-2 text-xs font-semibold focus:outline-none focus:border-[#163832]"
+                    className="w-full bg-[#F3F5F2] border border-[#D6DCD4] rounded-lg px-3 py-2.5 text-xs font-semibold focus:outline-none focus:border-[#163832]"
                   >
-                    <option value="moderate">Moderate (+2-4h delay risk)</option>
-                    <option value="high">High (+6-12h delay / temp spike)</option>
-                    <option value="critical">Critical (Immediate Spoilage Risk)</option>
+                    <option value="moderate">{t('incident.severityModerate', 'Moderate (+2-4h delay risk)')}</option>
+                    <option value="high">{t('incident.severityHigh', 'High (+6-12h delay / temp spike)')}</option>
+                    <option value="critical">{t('incident.severityCritical', 'Critical (Immediate Spoilage Risk)')}</option>
                   </select>
                 </div>
               )}
@@ -261,14 +263,14 @@ export const IncidentModal: React.FC<IncidentModalProps> = ({
             {!isDriver && (
               <div>
                 <label className="block font-mono text-[11px] font-bold text-[#163832] uppercase mb-1">
-                  Current Disruption Location
+                  {t('incident.location', 'Current Disruption Location')}
                 </label>
                 <input
                   type="text"
                   value={locationName}
                   onChange={(e) => setLocationName(e.target.value)}
                   placeholder="e.g. NH-48 Khandala Ghat Km 82, Lane 2"
-                  className="w-full bg-[#F3F5F2] border border-[#D6DCD4] rounded px-3 py-2 text-xs focus:outline-none focus:border-[#163832]"
+                  className="w-full bg-[#F3F5F2] border border-[#D6DCD4] rounded-lg px-3 py-2.5 text-xs focus:outline-none focus:border-[#163832]"
                   required
                 />
               </div>
@@ -276,16 +278,16 @@ export const IncidentModal: React.FC<IncidentModalProps> = ({
 
             <div>
               <label className="block font-mono text-[11px] font-bold text-[#163832] uppercase mb-1">
-                {isDriver ? 'Description' : 'Driver / Agent Operational Notes'}
+                {isDriver ? t('incident.notes', 'Description / Observations') : t('incident.notes', 'Driver / Agent Operational Notes')}
               </label>
               <textarea
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
                 rows={isDriver ? 4 : 3}
                 placeholder={isDriver
-                  ? 'Describe what happened: e.g. reefer compressor warning, cabin temperature rose from 2.8°C to 5.6°C...'
+                  ? t('incident.notesPlaceholder', 'Describe what happened: e.g. reefer compressor warning, cabin temperature rose from 2.8°C to 5.6°C...')
                   : 'Describe what happened: e.g. reefer compressor warning light triggered, cabin temperature rose from 2.8°C to 5.6°C due to ghat traffic climb...'}
-                className="w-full bg-[#F3F5F2] border border-[#D6DCD4] rounded px-3 py-2 text-xs focus:outline-none focus:border-[#163832]"
+                className="w-full bg-[#F3F5F2] border border-[#D6DCD4] rounded-lg px-3 py-2.5 text-xs focus:outline-none focus:border-[#163832]"
                 required
               />
             </div>
@@ -295,7 +297,7 @@ export const IncidentModal: React.FC<IncidentModalProps> = ({
             )}
 
             {!isDriver && (
-              <div className="bg-[#FCEBE6] border border-[#B3462C]/30 p-3 rounded flex items-start gap-2.5">
+              <div className="bg-[#FCEBE6] border border-[#B3462C]/30 p-3 rounded-xl flex items-start gap-2.5">
                 <AlertTriangle className="w-4 h-4 text-[#B3462C] shrink-0 mt-0.5" />
                 <div className="text-[11px] text-[#1A211E] leading-relaxed">
                   <span className="font-bold text-[#B3462C]">Automated Impact Calculation: </span>
@@ -303,7 +305,7 @@ export const IncidentModal: React.FC<IncidentModalProps> = ({
                   <strong className="font-mono">{severity === 'critical' ? '24h' : severity === 'high' ? '12h' : '6h'}</strong>, trigger
                   instant alert in the Admin Operations Inbox, and queue an alternative multimodal corridor.
 
-                  <div className="mt-2.5 p-2 bg-[#FFFFFF]/60 rounded border border-[#B3462C]/20">
+                  <div className="mt-2.5 p-2 bg-[#FFFFFF]/60 rounded-lg border border-[#B3462C]/20">
                     <span className="font-bold text-[#B3462C] flex items-center gap-1 mb-1">
                       ✨ AI Proposed Remediation
                     </span>
@@ -313,20 +315,20 @@ export const IncidentModal: React.FC<IncidentModalProps> = ({
               </div>
             )}
 
-            <div className="flex items-center justify-end gap-2.5 pt-2 border-t border-[#E5EBE3]">
+            <div className="flex items-center justify-end gap-2.5 pt-3 border-t border-[#E5EBE3]">
               <button
                 type="button"
                 onClick={onClose}
-                className="px-4 py-2 bg-[#F3F5F2] hover:bg-[#E5EBE3] text-[#1A211E] rounded font-medium transition-colors"
+                className="px-4 py-2 bg-[#F3F5F2] hover:bg-[#E5EBE3] text-[#1A211E] rounded-xl font-medium transition-colors cursor-pointer"
               >
-                Cancel
+                {t('common.cancel', 'Cancel')}
               </button>
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="px-5 py-2 bg-[#B3462C] hover:bg-[#8F341E] text-white rounded font-semibold font-mono tracking-wide transition-colors shadow-sm flex items-center gap-1.5"
+                className="px-5 py-2.5 bg-[#B3462C] hover:bg-[#8F341E] text-white rounded-xl font-semibold font-mono tracking-wide transition-colors shadow-sm flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
               >
-                {isSubmitting ? 'Transmitting telemetry...' : 'Submit incident report'}
+                {isSubmitting ? t('incident.submitting', 'Broadcasting Alert...') : t('incident.submitIncident', 'Broadcast Incident Alert')}
               </button>
             </div>
           </form>

@@ -3,6 +3,8 @@ import { AppHeader } from '../components/AppHeader';
 import { FreshnessGauge } from '../components/FreshnessGauge';
 import { IncidentModal } from '../components/IncidentModal';
 import { KarwaanMap } from '../components/KarwaanMap';
+import { KarwaanChatbot } from '../components/KarwaanChatbot';
+import { useLanguage } from '../contexts/LanguageContext';
 import { dataService } from '../services/dataService';
 import { DeliveryRoute, Shipment, IncidentReport, User } from '../types';
 import {
@@ -18,6 +20,7 @@ import {
 } from 'lucide-react';
 
 export const AgentDashboard: React.FC = () => {
+  const { t } = useLanguage();
   const [user, setUser] = useState<User | null>(null);
   const [routes, setRoutes] = useState<DeliveryRoute[]>([]);
   const [shipments, setShipments] = useState<Shipment[]>([]);
@@ -32,8 +35,6 @@ export const AgentDashboard: React.FC = () => {
   const isMumbatan = user?.email?.toLowerCase() === 'mumbatan199@gmail.com';
 
   // Route selection priority — NEVER surface a completed route when an active one exists.
-  // Completed routes are hidden from the driver; they'll see "No Active Route" instead of
-  // a stale manifest from a prior delivery.
   const myRoute = (() => {
     // 1. Explicit assignment via user.assignedRouteId (non-completed only)
     if (user?.assignedRouteId) {
@@ -129,7 +130,7 @@ export const AgentDashboard: React.FC = () => {
     setIsFinishing(true);
     try {
       await dataService.completeRoute(myRoute.id);
-      // Refresh from DB — myRoute.status will now be 'completed', hiding the button
+      // Refresh from DB
       const [r, s] = await Promise.all([dataService.getRoutes(), dataService.getShipments()]);
       setRoutes(r);
       setShipments(s);
@@ -141,7 +142,6 @@ export const AgentDashboard: React.FC = () => {
   };
 
   const handleLogout = () => {
-
     localStorage.removeItem('karwaan_token');
     window.location.href = '/';
   };
@@ -163,12 +163,32 @@ export const AgentDashboard: React.FC = () => {
     };
   }, [myRoute, incidents, completedStopIds]);
 
+  const getStopTypeLabel = (type: string) => {
+    switch (type) {
+      case 'pickup':
+        return t('driver.typePickup', 'Pickup');
+      case 'consolidation_hub':
+      case 'hub_transfer':
+        return t('driver.typeConsolidation', 'Consolidation Hub');
+      case 'rail_loading':
+        return t('driver.typeRailLoading', 'Rail Loading');
+      case 'rail_unloading':
+        return t('driver.typeRailUnloading', 'Rail Unloading');
+      case 'delivery':
+        return t('driver.typeDelivery', 'Delivery');
+      default:
+        return type.replace('_', ' ');
+    }
+  };
+
   if (loading || !user) {
     return (
       <div className="min-h-screen bg-[#F8FAF7] flex items-center justify-center">
         <div className="flex flex-col items-center gap-3 animate-pulse">
           <Truck className="w-12 h-12 text-[#5C7A50]" />
-          <span className="font-mono text-sm text-[#596560] font-medium tracking-wide">Syncing Route Manifest...</span>
+          <span className="font-mono text-sm text-[#596560] font-medium tracking-wide">
+            {t('driver.syncingManifest', 'Syncing Route Manifest...')}
+          </span>
         </div>
       </div>
     );
@@ -180,14 +200,19 @@ export const AgentDashboard: React.FC = () => {
         <AppHeader user={user} activeRole="agent" />
         <main className="flex-1 flex items-center justify-center p-6">
           <div className="bg-white border border-[#E5EBE3] rounded-2xl p-10 max-w-md w-full text-center shadow-sm relative">
-            <button onClick={handleLogout} className="absolute top-4 right-4 p-2 text-[#596560] hover:bg-[#F3F5F2] rounded-lg transition-colors">
+            <button onClick={handleLogout} className="absolute top-4 right-4 p-2 text-[#596560] hover:bg-[#F3F5F2] rounded-lg transition-colors cursor-pointer">
               <LogOut className="w-5 h-5" />
             </button>
             <Truck className="w-16 h-16 text-[#D6DCD4] mx-auto mb-4" />
-            <h2 className="font-display font-bold text-2xl text-[#163832] mb-2">No Active Route</h2>
-            <p className="text-[#596560] text-sm leading-relaxed">You are currently unassigned. Dispatch will notify you when a new consolidation manifest is ready.</p>
+            <h2 className="font-display font-bold text-2xl text-[#163832] mb-2">
+              {t('driver.noActiveRouteTitle', 'No Active Route')}
+            </h2>
+            <p className="text-[#596560] text-sm leading-relaxed">
+              {t('driver.noActiveRouteSub', 'You are currently unassigned. Dispatch will notify you when a new consolidation manifest is ready.')}
+            </p>
           </div>
         </main>
+        <KarwaanChatbot role="agent" />
       </div>
     );
   }
@@ -198,7 +223,7 @@ export const AgentDashboard: React.FC = () => {
 
       {isRouteCompleted && (
         <div className="bg-[#5C7A50] text-white text-center py-3 px-4 font-bold text-sm flex items-center justify-center gap-2 border-b-2 border-[#435A3A]">
-          <CheckCircle2 className="w-4 h-4" /> Route marked DELIVERED. All shipments updated. Well done, Captain!
+          <CheckCircle2 className="w-4 h-4" /> {t('driver.routeDeliveredBanner', 'Route marked DELIVERED. All shipments updated. Well done, Captain!')}
         </div>
       )}
 
@@ -219,10 +244,10 @@ export const AgentDashboard: React.FC = () => {
           
           <button 
             onClick={handleLogout}
-            className="flex items-center gap-2 px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg font-medium transition-colors border border-white/20"
+            className="flex items-center gap-2 px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg font-medium transition-colors border border-white/20 cursor-pointer"
           >
             <LogOut className="w-4 h-4" />
-            Sign Out
+            {t('common.signOut', 'Sign Out')}
           </button>
         </div>
       </div>
@@ -233,16 +258,20 @@ export const AgentDashboard: React.FC = () => {
           <div className="lg:col-span-4 space-y-6">
             <div className="bg-white rounded-2xl p-6 shadow-sm border border-[#E5EBE3]">
               <div className="flex justify-between items-center mb-6">
-                <h3 className="font-display font-bold text-lg text-[#163832]">Route Status</h3>
+                <h3 className="font-display font-bold text-lg text-[#163832]">
+                  {t('driver.routeStatus', 'Route Status')}
+                </h3>
                 <span className={`px-3 py-1.5 rounded-md text-[10px] font-mono font-bold uppercase tracking-wider shadow-sm ${activeIncidents.length > 0 ? 'bg-red-50 text-red-700 border border-red-200 animate-pulse' : 'bg-[#F3F5F2] text-[#5C7A50] border border-[#D6DCD4]'}`}>
-                  {activeIncidents.length > 0 ? '⚠️ INCIDENT ACTIVE' : 'ON SCHEDULE'}
+                  {activeIncidents.length > 0 ? t('driver.incidentActive', '⚠️ INCIDENT ACTIVE') : t('driver.onSchedule', 'ON SCHEDULE')}
                 </span>
               </div>
               
               <div className="space-y-3">
                 <div className="flex justify-between text-sm font-medium">
-                  <span className="text-[#596560]">Overall Progress</span>
-                  <span className="text-[#163832] font-bold">{completedStopsCount} of {totalStopsCount} Stops</span>
+                  <span className="text-[#596560]">{t('driver.overallProgress', 'Overall Progress')}</span>
+                  <span className="text-[#163832] font-bold">
+                    {completedStopsCount} of {totalStopsCount} {t('driver.stopsCount', 'Stops')}
+                  </span>
                 </div>
                 <div className="w-full bg-[#F3F5F2] h-4 rounded-full overflow-hidden shadow-inner border border-[#E5EBE3]">
                   <div className="bg-[#5C7A50] h-full rounded-full transition-all duration-1000 ease-out relative" style={{ width: `${progressPercent}%` }}>
@@ -253,17 +282,23 @@ export const AgentDashboard: React.FC = () => {
 
               <div className="grid grid-cols-3 gap-2 mt-8 border-t border-[#E5EBE3] pt-6">
                 <div className="text-center bg-[#F8FAF7] p-2 rounded-lg border border-[#E5EBE3]">
-                  <span className="block text-[10px] font-bold tracking-widest text-[#596560] mb-1">CABIN</span>
+                  <span className="block text-[10px] font-bold tracking-widest text-[#596560] mb-1">
+                    {t('driver.cabinTemp', 'CABIN')}
+                  </span>
                   <span className={`font-mono font-bold text-xl ${activeIncidents.length > 0 ? 'text-red-600' : 'text-[#163832]'}`}>
                     {activeIncidents.length > 0 ? '+5.6°' : '+2.8°'}
                   </span>
                 </div>
                 <div className="text-center bg-[#F8FAF7] p-2 rounded-lg border border-[#E5EBE3]">
-                  <span className="block text-[10px] font-bold tracking-widest text-[#596560] mb-1">TARGET</span>
+                  <span className="block text-[10px] font-bold tracking-widest text-[#596560] mb-1">
+                    {t('driver.targetTemp', 'TARGET')}
+                  </span>
                   <span className="font-mono font-bold text-xl text-[#596560]">1.5-4°</span>
                 </div>
                 <div className="text-center bg-[#F8FAF7] p-2 rounded-lg border border-[#E5EBE3]">
-                  <span className="block text-[10px] font-bold tracking-widest text-[#596560] mb-1">POWER</span>
+                  <span className="block text-[10px] font-bold tracking-widest text-[#596560] mb-1">
+                    {t('driver.reeferPower', 'POWER')}
+                  </span>
                   <span className="font-mono font-bold text-xl text-[#5C7A50]">92%</span>
                 </div>
               </div>
@@ -271,7 +306,7 @@ export const AgentDashboard: React.FC = () => {
 
             <div className="bg-white rounded-2xl p-4 sm:p-5 shadow-sm border border-[#E5EBE3]">
               <h3 className="font-display font-bold text-base text-[#163832] mb-4 flex items-center gap-2">
-                <MapPin className="w-5 h-5 text-[#D98E2B]"/> Live Routing Map
+                <MapPin className="w-5 h-5 text-[#D98E2B]"/> {t('driver.liveMap', 'Live Routing Map')}
               </h3>
               <div className="rounded-xl overflow-hidden border border-[#D6DCD4] shadow-inner">
                 <KarwaanMap routes={[myRoute]} selectedRouteId={myRoute.id} height="280px" showAllControls={false} showLegend={false} />
@@ -280,35 +315,38 @@ export const AgentDashboard: React.FC = () => {
 
             <button
               onClick={() => setIsIncidentModalOpen(true)}
-              className="w-full py-4 bg-white hover:bg-rose-50 border-2 border-[#B3462C] text-[#B3462C] rounded-xl font-bold transition-colors shadow-sm flex items-center justify-center gap-2"
+              className="w-full py-4 bg-white hover:bg-rose-50 border-2 border-[#B3462C] text-[#B3462C] rounded-xl font-bold transition-colors shadow-sm flex items-center justify-center gap-2 cursor-pointer"
             >
-              <AlertTriangle className="w-5 h-5" /> Report Incident
+              <AlertTriangle className="w-5 h-5" /> {t('driver.reportIncident', 'Report Incident')}
             </button>
 
             {progressPercent === 100 && !isRouteCompleted && (
               <button
                 onClick={handleFinishDelivery}
                 disabled={isFinishing}
-                className={`w-full py-5 rounded-xl font-bold text-base transition-all shadow-md flex items-center justify-center gap-3 border-2 bg-[#163832] hover:bg-[#0F2622] text-white border-[#163832] animate-pulse ${isFinishing ? 'opacity-60 cursor-not-allowed' : 'active:scale-95'}`}
+                className={`w-full py-5 rounded-xl font-bold text-base transition-all shadow-md flex items-center justify-center gap-3 border-2 bg-[#163832] hover:bg-[#0F2622] text-white border-[#163832] animate-pulse cursor-pointer ${isFinishing ? 'opacity-60 cursor-not-allowed' : 'active:scale-95'}`}
               >
                 <Flag className="w-5 h-5" />
-                {isFinishing ? 'Completing Delivery...' : '🎉 FINISH DELIVERY'}
+                {isFinishing ? t('driver.completingDelivery', 'Completing Delivery...') : t('driver.finishDelivery', '🎉 FINISH DELIVERY')}
               </button>
             )}
           </div>
 
           <div className="lg:col-span-8">
-            <h2 className="font-display font-bold text-2xl text-[#163832] px-1 mb-6">Manifest & Stop Sequence</h2>
+            <h2 className="font-display font-bold text-2xl text-[#163832] px-1 mb-6">
+              {t('driver.manifestSequence', 'Manifest & Stop Sequence')}
+            </h2>
             
             {(!myRoute.stops || myRoute.stops.length === 0) ? (
               <div className="bg-white border border-[#E5EBE3] border-dashed rounded-3xl p-12 text-center shadow-sm flex flex-col items-center justify-center h-[400px]">
                 <div className="bg-[#F8FAF7] p-5 rounded-full mb-4">
                   <PackageOpen className="w-12 h-12 text-[#D98E2B]" />
                 </div>
-                <h3 className="font-display font-bold text-xl text-[#163832] mb-2">Fleet on Standby (0 Consignments)</h3>
+                <h3 className="font-display font-bold text-xl text-[#163832] mb-2">
+                  {t('driver.standbyTitle', 'Fleet on Standby (0 Consignments)')}
+                </h3>
                 <p className="text-[#596560] max-w-md mx-auto text-sm leading-relaxed">
-                  No orders have been dispatched to <span className="font-bold text-[#163832] font-mono">{myRoute.vehicleId || 'this fleet'}</span> yet. 
-                  Once the Admin consolidates shipments and dispatches them to this vehicle, the manifest will appear here automatically.
+                  {t('driver.standbySub', 'No orders have been dispatched to this fleet yet. Once the Admin consolidates shipments and dispatches them to this vehicle, the manifest will appear here automatically.')}
                 </p>
               </div>
             ) : (
@@ -343,7 +381,7 @@ export const AgentDashboard: React.FC = () => {
                           <div className="space-y-1.5 w-full">
                             <div className="flex flex-wrap items-center gap-3">
                               <span className="text-[10px] font-bold uppercase tracking-widest px-2.5 py-1 rounded-md bg-[#F3F5F2] text-[#163832] border border-[#D6DCD4]">
-                                {stop.type.replace('_', ' ')}
+                                {getStopTypeLabel(stop.type)}
                               </span>
                               <span className="text-sm font-mono font-bold text-[#596560] flex items-center gap-1.5 bg-[#F8FAF7] px-2 py-0.5 rounded border border-[#E5EBE3]">
                                 <Clock className="w-3.5 h-3.5 text-[#5C7A50]" /> {stop.scheduledTime}
@@ -373,19 +411,21 @@ export const AgentDashboard: React.FC = () => {
                              <button
                                onClick={() => handleMarkStopComplete(stop.id)}
                                disabled={!isNext}
-                               className={`w-full py-4 rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-2 touch-manipulation tracking-wide ${
+                               className={`w-full py-4 rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-2 touch-manipulation tracking-wide cursor-pointer ${
                                  isNext 
                                  ? 'bg-[#5C7A50] hover:bg-[#435A3A] text-white shadow-md active:scale-95 border border-[#435A3A]' 
                                  : 'bg-[#F3F5F2] text-[#A3ADA8] cursor-not-allowed border border-[#E5EBE3]'
                                }`}
                              >
                                <CheckCircle2 className="w-5 h-5" />
-                               {isNext ? 'COMPLETE' : 'LOCKED'}
+                               {isNext ? t('driver.btnComplete', 'COMPLETE') : t('driver.btnLocked', 'LOCKED')}
                              </button>
                           ) : (
                             <div className="w-full py-3 bg-[#F8FAF7] text-[#5C7A50] border border-[#E5EBE3] rounded-xl text-center text-sm font-bold flex flex-col items-center justify-center gap-1.5 shadow-inner">
                               <CheckCircle2 className="w-6 h-6" />
-                              <span className="text-[10px] uppercase font-mono tracking-widest opacity-80">Done at {displayTime}</span>
+                              <span className="text-[10px] uppercase font-mono tracking-widest opacity-80">
+                                {t('driver.doneAt', 'Done at')} {displayTime}
+                              </span>
                             </div>
                           )}
                         </div>
@@ -399,22 +439,24 @@ export const AgentDashboard: React.FC = () => {
                     <div>
                       <div className="flex items-center gap-2 mb-1">
                         <CheckCircle2 className="w-5 h-5 text-[#D98E2B]" />
-                        <h4 className="font-display font-black text-xl text-[#F8FAF7]">All Waypoints Successfully Completed!</h4>
+                        <h4 className="font-display font-black text-xl text-[#F8FAF7]">
+                          {t('driver.allWaypointsDoneTitle', 'All Waypoints Successfully Completed!')}
+                        </h4>
                       </div>
                       <p className="text-xs text-white/80 font-mono">
-                        Consignment delivery verified at destination. Click below to close the manifest and update all shipment states.
+                        {t('driver.allWaypointsDoneSub', 'Consignment delivery verified at destination. Click below to close the manifest and update all shipment states.')}
                       </p>
                     </div>
 
                     <button
                       onClick={handleFinishDelivery}
                       disabled={isFinishing}
-                      className={`px-8 py-4 rounded-xl font-bold text-base transition-all shadow-md flex items-center justify-center gap-3 bg-[#D98E2B] hover:bg-[#C07B20] text-[#163832] whitespace-nowrap active:scale-95 ${
+                      className={`px-8 py-4 rounded-xl font-bold text-base transition-all shadow-md flex items-center justify-center gap-3 bg-[#D98E2B] hover:bg-[#C07B20] text-[#163832] whitespace-nowrap active:scale-95 cursor-pointer ${
                         isFinishing ? 'opacity-60 cursor-not-allowed' : ''
                       }`}
                     >
                       <Flag className="w-5 h-5" />
-                      {isFinishing ? 'Completing Delivery...' : '🎉 FINISH DELIVERY'}
+                      {isFinishing ? t('driver.completingDelivery', 'Completing Delivery...') : t('driver.finishDelivery', '🎉 FINISH DELIVERY')}
                     </button>
                   </div>
                 )}
@@ -437,6 +479,9 @@ export const AgentDashboard: React.FC = () => {
           setShipments(await dataService.getShipments());
         }}
       />
+
+      {/* Floating Chatbot for Delivery Agent */}
+      <KarwaanChatbot role="agent" contextData={{ myRoute }} />
     </div>
   );
 };
