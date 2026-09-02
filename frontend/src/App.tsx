@@ -18,54 +18,57 @@ import { BusinessDashboard } from "./pages/BusinessDashboard";
 import { AgentDashboard } from "./pages/AgentDashboard";
 import { ShipmentDetailsPage } from "./pages/ShipmentDetailsPage";
 import { AuthProvider } from "./contexts/AuthContext";
+import { LanguageProvider } from "./contexts/LanguageContext";
 
 export default function App() {
   return (
     <AuthProvider>
-      <BrowserRouter>
-      <Routes>
-        {/* Public */}
-        <Route path="/" element={<LandingPage />} />
-        <Route path="/select-role" element={<RoleSelectionPage />} />
-        <Route path="/login/:role" element={<LoginPage />} />
-        <Route
-          path="/login"
-          element={<Navigate to="/select-role" replace />}
-        />
-        <Route path="/register" element={<RegisterPage />} />
-        <Route path="/register/:role" element={<RegisterPage />} />
+      <LanguageProvider>
+        <BrowserRouter>
+          <Routes>
+            {/* Public */}
+            <Route path="/" element={<LandingPage />} />
+            <Route path="/select-role" element={<RoleSelectionPage />} />
+            <Route path="/login/:role" element={<LoginPage />} />
+            <Route
+              path="/login"
+              element={<Navigate to="/select-role" replace />}
+            />
+            <Route path="/register" element={<RegisterPage />} />
+            <Route path="/register/:role" element={<RegisterPage />} />
 
-        {/* ================= ADMIN ================= */}
-        <Route path="/admin" element={<AdminLayout />}>
-          {/* /admin */}
-          <Route index element={<AdminDashboard />} />
+            {/* ================= ADMIN ================= */}
+            <Route path="/admin" element={<AdminLayout />}>
+              {/* /admin */}
+              <Route index element={<AdminDashboard />} />
 
-          {/* /admin/shipments */}
-          <Route path="shipments" element={<AdminShipments />} />
-          <Route path="shipments/:id" element={<ShipmentDetailsPage />} />
+              {/* /admin/shipments */}
+              <Route path="shipments" element={<AdminShipments />} />
+              <Route path="shipments/:id" element={<ShipmentDetailsPage />} />
 
-          {/* /admin/clusters */}
-          <Route path="clusters" element={<AdminClusters />} />
+              {/* /admin/clusters */}
+              <Route path="clusters" element={<AdminClusters />} />
 
-          {/* /admin/routes */}
-          <Route path="routes" element={<AdminRoutes />} />
+              {/* /admin/routes */}
+              <Route path="routes" element={<AdminRoutes />} />
 
-          {/* /admin/incidents */}
-          <Route path="incidents" element={<AdminIncidents />} />
+              {/* /admin/incidents */}
+              <Route path="incidents" element={<AdminIncidents />} />
 
-          {/* /admin/map */}
-          <Route path="map" element={<AdminMap />} />
-        </Route>
+              {/* /admin/map */}
+              <Route path="map" element={<AdminMap />} />
+            </Route>
 
-        {/* Other roles */}
-        <Route path="/business" element={<BusinessDashboard />} />
-        <Route path="/business/shipments/:id" element={<ShipmentDetailsPage />} />
-        <Route path="/agent" element={<AgentDashboard />} />
+            {/* Other roles */}
+            <Route path="/business" element={<BusinessDashboard />} />
+            <Route path="/business/shipments/:id" element={<ShipmentDetailsPage />} />
+            <Route path="/agent" element={<AgentDashboard />} />
 
-        {/* Fallback */}
-        <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
-    </BrowserRouter>
+            {/* Fallback */}
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+        </BrowserRouter>
+      </LanguageProvider>
     </AuthProvider>
   );
 }

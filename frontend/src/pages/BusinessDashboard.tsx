@@ -6,9 +6,11 @@ import { MapLegend } from '../components/MapLegend';
 import { FreshnessGauge } from '../components/FreshnessGauge';
 import { CargoAutocomplete, detectCategoryFromCargo, CargoSuggestion } from '../components/CargoAutocomplete';
 import { LocationSelect } from '../components/LocationSelect';
+import { KarwaanChatbot } from '../components/KarwaanChatbot';
 import { dataService } from '../services/dataService';
 import { Shipment, BusinessEntity, User, PerishableCategory, Hub } from '../types';
 import { useAuth } from '../contexts/AuthContext';
+import { useLanguage } from '../contexts/LanguageContext';
 import {
   Plus,
   TrendingDown,
@@ -298,6 +300,7 @@ export const BusinessDashboard: React.FC = () => {
   // 1. DATA & STATE (UNTOUCHED TO PRESERVE BACKEND CONNECTIONS)
   // ----------------------------------------------------------------------
   const { user: authUser, hasAccess } = useAuth();
+  const { t } = useLanguage();
   const [user, setUser] = useState<User | null>(authUser);
   const navigate = useNavigate();
   const [businesses, setBusinesses] = useState<BusinessEntity[]>([]);
@@ -737,10 +740,10 @@ export const BusinessDashboard: React.FC = () => {
                 setModalStep('intake');
                 setIsNewModalOpen(true);
               }}
-              className="px-6 py-2.5 bg-[#5C7A50] hover:bg-[#435A3A] text-white rounded-xl font-semibold flex items-center justify-center gap-2 transition-all shadow-md hover:shadow-lg active:scale-95 touch-manipulation"
+              className="px-6 py-2.5 bg-[#5C7A50] hover:bg-[#435A3A] text-white rounded-xl font-semibold flex items-center justify-center gap-2 transition-all shadow-md hover:shadow-lg active:scale-95 touch-manipulation cursor-pointer"
             >
               <Plus className="w-5 h-5" />
-              <span>New Shipment</span>
+              <span>{t('shipper.newShipment', 'New Shipment')}</span>
             </button>
           </div>
         </div>
@@ -750,33 +753,33 @@ export const BusinessDashboard: React.FC = () => {
           <div className="bg-white border border-[#E5EBE3] rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden group">
             <div className="absolute top-0 right-0 w-24 h-24 bg-green-50 rounded-bl-full -z-10 group-hover:scale-110 transition-transform"></div>
             <div className="flex items-center justify-between text-xs font-mono text-[#596560] font-bold tracking-widest uppercase mb-3">
-              <span>Estimated Freight Savings</span>
+              <span>{t('shipper.freightSavings', 'Estimated Freight Savings')}</span>
               <div className="bg-green-100 p-2 rounded-lg"><TrendingDown className="w-5 h-5 text-green-700" /></div>
             </div>
             <div className="font-display font-black text-3xl text-[#163832]">₹{totalCostSaved.toLocaleString()}</div>
             <div className="text-sm text-[#5C7A50] font-medium mt-1">
-              {totalCostSaved > 0 ? `vs. individual solo reefer bookings` : 'Book shipments to start saving'}
+              {totalCostSaved > 0 ? t('shipper.freightSavingsSub', 'vs. individual solo reefer bookings') : t('shipper.freightSavingsEmpty', 'Book shipments to start saving')}
             </div>
           </div>
 
           <div className="bg-white border border-[#E5EBE3] rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden group">
             <div className="absolute top-0 right-0 w-24 h-24 bg-emerald-50 rounded-bl-full -z-10 group-hover:scale-110 transition-transform"></div>
             <div className="flex items-center justify-between text-xs font-mono text-[#596560] font-bold tracking-widest uppercase mb-3">
-              <span>Estimated Carbon Reduction</span>
+              <span>{t('shipper.carbonReduction', 'Estimated Carbon Reduction')}</span>
               <div className="bg-emerald-100 p-2 rounded-lg"><Leaf className="w-5 h-5 text-emerald-700" /></div>
             </div>
             <div className="font-display font-black text-3xl text-[#163832]">{totalCO2Saved.toFixed(1)} <span className="text-xl text-[#596560]">kg CO₂</span></div>
-            <div className="text-sm text-emerald-700 font-medium mt-1">Via multimodal routing</div>
+            <div className="text-sm text-emerald-700 font-medium mt-1">{t('shipper.carbonReductionSub', 'Via multimodal routing')}</div>
           </div>
 
           <div className="bg-white border border-[#E5EBE3] rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden group">
             <div className="absolute top-0 right-0 w-24 h-24 bg-blue-50 rounded-bl-full -z-10 group-hover:scale-110 transition-transform"></div>
             <div className="flex items-center justify-between text-xs font-mono text-[#596560] font-bold tracking-widest uppercase mb-3">
-              <span>Freshness Index</span>
+              <span>{t('shipper.freshnessIndex', 'Freshness Index')}</span>
               <div className="bg-blue-100 p-2 rounded-lg"><ThermometerSnowflake className="w-5 h-5 text-blue-700" /></div>
             </div>
             <div className="font-display font-black text-3xl text-[#163832]">{avgFreshness}%</div>
-            <div className="text-sm text-blue-700 font-medium mt-1">Unbroken cold-chain integrity</div>
+            <div className="text-sm text-blue-700 font-medium mt-1">{t('shipper.freshnessIndexSub', 'Unbroken cold-chain integrity')}</div>
           </div>
         </div>
 
@@ -787,8 +790,8 @@ export const BusinessDashboard: React.FC = () => {
           <div className="bg-white border border-[#E5EBE3] rounded-3xl p-1 sm:p-6 shadow-sm">
             <div className="px-4 py-4 sm:px-0 sm:pt-0 sm:pb-5 border-b border-[#E5EBE3] flex items-center justify-between">
               <div>
-                <h3 className="font-display font-bold text-xl text-[#163832]">Manifest</h3>
-                <p className="text-sm text-[#596560]">Active & completed shipments ({myShipments.length})</p>
+                <h3 className="font-display font-bold text-xl text-[#163832]">{t('shipper.manifestTitle', 'Manifest')}</h3>
+                <p className="text-sm text-[#596560]">{t('shipper.manifestSub', 'Active & completed shipments')} ({myShipments.length})</p>
               </div>
             </div>
 
@@ -797,9 +800,9 @@ export const BusinessDashboard: React.FC = () => {
                 <div className="bg-[#F8FAF7] p-6 rounded-full mb-4">
                   <PackageOpen className="w-12 h-12 text-[#D6DCD4]" />
                 </div>
-                <h4 className="font-bold text-[#163832] text-lg mb-2">No shipments yet</h4>
-                <p className="text-sm text-[#596560] mb-6 max-w-sm">Create your first shipment to see how AI consolidation can reduce your logistics costs.</p>
-                <button onClick={() => { setModalStep('intake'); setIsNewModalOpen(true); }} className="px-6 py-2.5 bg-[#5C7A50] text-white rounded-xl font-semibold shadow-md">Create Shipment</button>
+                <h4 className="font-bold text-[#163832] text-lg mb-2">{t('shipper.noShipmentsTitle', 'No shipments yet')}</h4>
+                <p className="text-sm text-[#596560] mb-6 max-w-sm">{t('shipper.noShipmentsSub', 'Create your first shipment to see how AI consolidation can reduce your logistics costs.')}</p>
+                <button onClick={() => { setModalStep('intake'); setIsNewModalOpen(true); }} className="px-6 py-2.5 bg-[#5C7A50] text-white rounded-xl font-semibold shadow-md cursor-pointer">{t('shipper.createShipment', 'Create Shipment')}</button>
               </div>
             ) : (
               <>
@@ -808,17 +811,16 @@ export const BusinessDashboard: React.FC = () => {
                   <table className="w-full text-left text-sm border-collapse table-auto">
                     <thead>
                       <tr className="text-[#596560] font-mono text-[10px] uppercase tracking-widest border-b border-[#E5EBE3]">
-                        <th className="py-3 px-5 font-bold">Consignment</th>
-                        <th className="py-3 px-5 font-bold">Destination</th>
-                        <th className="py-3 px-5 font-bold">Integrity</th>
-                        <th className="py-3 px-5 font-bold">Status</th>
+                        <th className="py-3 px-5 font-bold">{t('shipper.thConsignment', 'Consignment')}</th>
+                        <th className="py-3 px-5 font-bold">{t('shipper.thDestination', 'Destination')}</th>
+                        <th className="py-3 px-5 font-bold">{t('shipper.thIntegrity', 'Integrity')}</th>
+                        <th className="py-3 px-5 font-bold">{t('shipper.thStatus', 'Status')}</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-[#F3F5F2]">
                       {myShipments.map((shipment) => {
                         const isSelected = selectedShipment?.id === shipment.id;
                         return (
-                          // THE FIX: Using border-l-4 instead of an absolute <td> to prevent layout breaking
                           <tr
                             key={shipment.id}
                             onClick={() => handleSelectShipment(shipment)}
@@ -835,7 +837,6 @@ export const BusinessDashboard: React.FC = () => {
                               <FreshnessGauge percentage={shipment.freshnessPercent} remainingHours={shipment.remainingShelfLifeHours} size="sm" showHours predictedRiskLevel={shipment.spoilageRiskLevel} />
                             </td>
                             <td className="py-4 px-5">
-                              {/* THE FIX: whitespace-nowrap prevents the awkward badge splitting */}
                               <span className={`whitespace-nowrap px-2.5 py-1 rounded-md text-[10px] font-mono font-bold uppercase tracking-wider ${
                                 shipment.status === 'in_transit' ? 'bg-[#5C7A50]/10 text-[#5C7A50] border border-[#5C7A50]/20' : 
                                 shipment.status === 'pending' ? 'bg-[#D98E2B]/10 text-[#D98E2B] border border-[#D98E2B]/20' :
@@ -904,9 +905,9 @@ export const BusinessDashboard: React.FC = () => {
                 <div className="bg-[#5C7A50] p-2 rounded-xl text-white shadow-sm"><Plus className="w-5 h-5" /></div>
                 <div>
                   <h3 className="font-display font-black text-xl text-[#163832]">
-                    {modalStep === 'intake' && 'New Shipment Request'}
-                    {modalStep === 'processing' && 'AI Logistics Engine Running...'}
-                    {modalStep === 'results' && 'Optimal Logistics Plan Ready'}
+                    {modalStep === 'intake' && t('shipper.modalNewTitle', 'New Shipment Request')}
+                    {modalStep === 'processing' && t('shipper.modalProcessingTitle', 'AI Logistics Engine Running...')}
+                    {modalStep === 'results' && t('shipper.modalResultsTitle', 'Optimal Logistics Plan Ready')}
                   </h3>
                   <div className="flex items-center gap-1.5 mt-0.5">
                     {(['intake', 'processing', 'results'] as const).map((step, i) => (
@@ -916,7 +917,7 @@ export const BusinessDashboard: React.FC = () => {
                           (modalStep === 'results' && step === 'intake') || (modalStep === 'results' && step === 'processing') || (modalStep === 'processing' && step === 'intake') ? 'text-[#163832]/40' :
                           'text-[#596560]/40'
                         }`}>
-                          {step === 'intake' ? '① Describe' : step === 'processing' ? '② Analyse' : '③ Compare & Select'}
+                          {step === 'intake' ? t('shipper.stepDescribe', '① Describe') : step === 'processing' ? t('shipper.stepAnalyse', '② Analyse') : t('shipper.stepCompare', '③ Compare & Select')}
                         </span>
                         {i < 2 && <span className="text-[#D6DCD4] text-[10px]">›</span>}
                       </React.Fragment>
@@ -924,7 +925,7 @@ export const BusinessDashboard: React.FC = () => {
                   </div>
                 </div>
               </div>
-              <button onClick={closeNewModal} className="text-gray-400 hover:text-gray-700 bg-gray-100 hover:bg-gray-200 p-2 rounded-full transition-colors">
+              <button onClick={closeNewModal} className="text-gray-400 hover:text-gray-700 bg-gray-100 hover:bg-gray-200 p-2 rounded-full transition-colors cursor-pointer">
                 <X className="w-5 h-5" />
               </button>
             </div>
@@ -943,23 +944,25 @@ export const BusinessDashboard: React.FC = () => {
               
               {/* SECTION 1: Cargo Specs */}
               <section>
-                <h4 className="font-bold text-[#163832] mb-4 flex items-center gap-2 border-b border-gray-200 pb-2"><PackageOpen className="w-4 h-4 text-[#5C7A50]" /> 1. Cargo Specifications</h4>
+                <h4 className="font-bold text-[#163832] mb-4 flex items-center gap-2 border-b border-gray-200 pb-2">
+                  <PackageOpen className="w-4 h-4 text-[#5C7A50]" /> {t('shipper.secCargoSpecs', '1. Cargo Specifications')}
+                </h4>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                   <div>
                     <label className="block text-xs font-bold text-gray-700 mb-1.5 flex items-center justify-between">
-                      <span>Cargo Description</span>
+                      <span>{t('shipper.labelCargoDesc', 'Cargo Description')}</span>
                       <span className="text-[10px] text-[#5C7A50] font-mono font-normal">AI Autocomplete</span>
                     </label>
                     <CargoAutocomplete
                       value={newCargo.cargoType}
                       onChange={handleCargoTextChange}
                       onSelectSuggestion={handleCargoSuggestionSelect}
-                      placeholder="e.g. Alphonso Mangoes Grade A or Shimla Apples"
+                      placeholder={t('shipper.cargoDescPlaceholder', 'e.g. Alphonso Mangoes Grade A or Shimla Apples')}
                       required
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-gray-700 mb-1.5">Produce Category</label>
+                    <label className="block text-xs font-bold text-gray-700 mb-1.5">{t('shipper.labelCategory', 'Produce Category')}</label>
                     <select value={newCargo.category} onChange={(e) => { setIsCategoryDirty(true); setNewCargo({ ...newCargo, category: e.target.value as PerishableCategory }) }} className="w-full bg-white border border-gray-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-[#5C7A50]/20 focus:border-[#5C7A50] shadow-sm text-sm">
                       <option value="berries">Fresh Berries / Strawberries</option>
                       <option value="mangoes">Alphonso / Tropical Fruits</option>
@@ -971,15 +974,15 @@ export const BusinessDashboard: React.FC = () => {
                     </select>
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-gray-700 mb-1.5">Weight (kg)</label>
+                    <label className="block text-xs font-bold text-gray-700 mb-1.5">{t('shipper.labelWeight', 'Weight (kg)')}</label>
                     <input type="number" required min="20" max="5000" value={newCargo.weightKg} onChange={(e) => setNewCargo({ ...newCargo, weightKg: e.target.value === '' ? '' : Number(e.target.value) })} className="w-full bg-white border border-gray-300 rounded-lg px-4 py-2.5 font-mono focus:ring-2 focus:ring-[#5C7A50]/20 focus:border-[#5C7A50] shadow-sm text-sm" />
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-gray-700 mb-1.5">Target Temp Band (°C)</label>
+                    <label className="block text-xs font-bold text-gray-700 mb-1.5">{t('shipper.labelTargetTemp', 'Target Temp Band (°C)')}</label>
                     <div className="flex items-center gap-2">
-                      <input type="number" step="0.5" required value={newCargo.targetTempMin} onChange={(e) => setNewCargo({ ...newCargo, targetTempMin: e.target.value === '' ? '' : Number(e.target.value) })} className="w-1/2 bg-white border border-gray-300 rounded-lg px-3 py-2.5 font-mono shadow-sm text-sm" placeholder="Min" />
+                      <input type="number" step="0.5" required value={newCargo.targetTempMin} onChange={(e) => setNewCargo({ ...newCargo, targetTempMin: e.target.value === '' ? '' : Number(e.target.value) })} className="w-1/2 bg-white border border-gray-300 rounded-lg px-3 py-2.5 font-mono shadow-sm text-sm" placeholder={t('shipper.tempMin', 'Min')} />
                       <span className="text-gray-400 font-medium">to</span>
-                      <input type="number" step="0.5" required value={newCargo.targetTempMax} onChange={(e) => setNewCargo({ ...newCargo, targetTempMax: e.target.value === '' ? '' : Number(e.target.value) })} className="w-1/2 bg-white border border-gray-300 rounded-lg px-3 py-2.5 font-mono shadow-sm text-sm" placeholder="Max" />
+                      <input type="number" step="0.5" required value={newCargo.targetTempMax} onChange={(e) => setNewCargo({ ...newCargo, targetTempMax: e.target.value === '' ? '' : Number(e.target.value) })} className="w-1/2 bg-white border border-gray-300 rounded-lg px-3 py-2.5 font-mono shadow-sm text-sm" placeholder={t('shipper.tempMax', 'Max')} />
                     </div>
                   </div>
                 </div>
@@ -987,32 +990,34 @@ export const BusinessDashboard: React.FC = () => {
 
               {/* SECTION 2: Routing */}
               <section>
-                <h4 className="font-bold text-[#163832] mb-4 flex items-center gap-2 border-b border-gray-200 pb-2"><MapPin className="w-4 h-4 text-[#D98E2B]" /> 2. Logistics Details</h4>
+                <h4 className="font-bold text-[#163832] mb-4 flex items-center gap-2 border-b border-gray-200 pb-2">
+                  <MapPin className="w-4 h-4 text-[#D98E2B]" /> {t('shipper.secLogistics', '2. Logistics Details')}
+                </h4>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                   <div>
                     <label className="block text-xs font-bold text-gray-700 mb-1.5 flex items-center justify-between">
-                      <span>Pickup Origin</span>
+                      <span>{t('shipper.labelOrigin', 'Pickup Origin')}</span>
                       <span className="text-[10px] text-[#5C7A50] font-mono font-normal">Verified DB Hub</span>
                     </label>
                     <LocationSelect
                       hubs={availableHubs}
                       value={newCargo.originName}
                       onChange={handleOriginSelect}
-                      placeholder="Select verified origin hub..."
+                      placeholder={t('shipper.placeholderOrigin', 'Select verified origin hub...')}
                       type="origin"
                       required
                     />
                   </div>
                   <div>
                     <label className="block text-xs font-bold text-gray-700 mb-1.5 flex items-center justify-between">
-                      <span>Destination Hub</span>
+                      <span>{t('shipper.labelDestination', 'Destination Hub')}</span>
                       <span className="text-[10px] text-[#D98E2B] font-mono font-normal">Verified DB Hub</span>
                     </label>
                     <LocationSelect
                       hubs={availableHubs}
                       value={newCargo.destinationName}
                       onChange={handleDestinationSelect}
-                      placeholder="Select verified destination terminal..."
+                      placeholder={t('shipper.placeholderDestination', 'Select verified destination terminal...')}
                       type="destination"
                       required
                     />
@@ -1022,21 +1027,23 @@ export const BusinessDashboard: React.FC = () => {
 
               {/* SECTION 3: SLA */}
               <section>
-                <h4 className="font-bold text-[#163832] mb-4 flex items-center gap-2 border-b border-gray-200 pb-2"><ShieldCheck className="w-4 h-4 text-blue-500" /> 3. Service Level Agreement (SLA)</h4>
+                <h4 className="font-bold text-[#163832] mb-4 flex items-center gap-2 border-b border-gray-200 pb-2">
+                  <ShieldCheck className="w-4 h-4 text-blue-500" /> {t('shipper.secSLA', '3. Service Level Agreement (SLA)')}
+                </h4>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 mb-5">
                   <div>
-                    <label className="block text-xs font-bold text-gray-700 mb-1.5">Total Shelf Life (Days)</label>
+                    <label className="block text-xs font-bold text-gray-700 mb-1.5">{t('shipper.labelShelfLife', 'Total Shelf Life (Days)')}</label>
                     <input type="number" required min="1" value={newCargo.totalShelfLifeDays} onChange={(e) => setNewCargo({ ...newCargo, totalShelfLifeDays: e.target.value === '' ? '' : Number(e.target.value) })} className="w-full bg-white border border-gray-300 rounded-lg px-4 py-2.5 font-mono shadow-sm" />
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-gray-700 mb-1.5">Spoilage Integrity Threshold (%)</label>
-                    <input type="number" required min="0" max="100" value={newCargo.slaMaxSpoilagePercent} onChange={(e) => setNewCargo({ ...newCargo, slaMaxSpoilagePercent: e.target.value === '' ? '' : Number(e.target.value) })} className="w-full bg-white border border-gray-300 rounded-lg px-4 py-2.5 font-mono shadow-sm" placeholder="Alert if risk exceeds..." />
+                    <label className="block text-xs font-bold text-gray-700 mb-1.5">{t('shipper.labelSpoilageThreshold', 'Spoilage Integrity Threshold (%)')}</label>
+                    <input type="number" required min="0" max="100" value={newCargo.slaMaxSpoilagePercent} onChange={(e) => setNewCargo({ ...newCargo, slaMaxSpoilagePercent: e.target.value === '' ? '' : Number(e.target.value) })} className="w-full bg-white border border-gray-300 rounded-lg px-4 py-2.5 font-mono shadow-sm" placeholder={t('shipper.placeholderSpoilage', 'Alert if risk exceeds...')} />
                   </div>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                   <div>
-                    <label className="block text-xs font-bold text-gray-700 mb-1.5">Max Delivery SLA (Hours)</label>
-                    <input type="number" min="1" value={newCargo.slaMaxDeliveryHours} onChange={(e) => setNewCargo({ ...newCargo, slaMaxDeliveryHours: e.target.value === '' ? '' : Number(e.target.value) })} className="w-full bg-white border border-gray-300 rounded-lg px-4 py-2.5 font-mono shadow-sm" placeholder="e.g. 48 (Defaults to 48 if empty)" />
+                    <label className="block text-xs font-bold text-gray-700 mb-1.5">{t('shipper.labelMaxSLA', 'Max Delivery SLA (Hours)')}</label>
+                    <input type="number" min="1" value={newCargo.slaMaxDeliveryHours} onChange={(e) => setNewCargo({ ...newCargo, slaMaxDeliveryHours: e.target.value === '' ? '' : Number(e.target.value) })} className="w-full bg-white border border-gray-300 rounded-lg px-4 py-2.5 font-mono shadow-sm" placeholder={t('shipper.placeholderMaxSLA', 'e.g. 48 (Defaults to 48 if empty)')} />
                   </div>
                 </div>
               </section>
@@ -1045,9 +1052,9 @@ export const BusinessDashboard: React.FC = () => {
               <div className="bg-gradient-to-r from-green-50 to-[#F8FAF7] border border-green-200 p-4 rounded-xl flex items-start gap-3">
                 <Sparkles className="w-5 h-5 text-green-600 mt-0.5 shrink-0" />
                 <div>
-                  <h5 className="font-bold text-green-800 text-sm mb-1">Instant AI Matching Active</h5>
+                  <h5 className="font-bold text-green-800 text-sm mb-1">{t('shipper.aiMatchingTitle', 'Instant AI Matching Active')}</h5>
                   <p className="text-gray-600 text-xs leading-relaxed">
-                    Upon submission, Karwaan's engine will instantly search for active cold-chain clusters on your corridor to guarantee maximum LTL cost savings without violating your Spoilage Integrity Threshold.
+                    {t('shipper.aiMatchingDesc', "Upon submission, Karwaan's engine will instantly search for active cold-chain clusters on your corridor to guarantee maximum LTL cost savings without violating your Spoilage Integrity Threshold.")}
                   </p>
                 </div>
               </div>
@@ -1056,11 +1063,11 @@ export const BusinessDashboard: React.FC = () => {
 
             {/* Footer Actions */}
             <div className="bg-white p-5 border-t border-[#E5EBE3] flex items-center justify-end gap-3 rounded-b-3xl">
-              <button type="button" onClick={closeNewModal} className="px-5 py-3 text-gray-600 hover:bg-gray-100 rounded-xl font-bold transition-colors">
-                Cancel
+              <button type="button" onClick={closeNewModal} className="px-5 py-3 text-gray-600 hover:bg-gray-100 rounded-xl font-bold transition-colors cursor-pointer">
+                {t('common.cancel', 'Cancel')}
               </button>
-              <button type="submit" onClick={handleCreateShipment} className="px-6 py-3 bg-[#163832] hover:bg-[#0f2622] text-white rounded-xl font-bold shadow-lg shadow-[#163832]/20 flex items-center gap-2 transition-transform hover:-translate-y-0.5">
-                Find Best Plan <ChevronRight className="w-4 h-4" />
+              <button type="submit" onClick={handleCreateShipment} className="px-6 py-3 bg-[#163832] hover:bg-[#0f2622] text-white rounded-xl font-bold shadow-lg shadow-[#163832]/20 flex items-center gap-2 transition-transform hover:-translate-y-0.5 cursor-pointer">
+                {t('shipper.findBestPlan', 'Find Best Plan')} <ChevronRight className="w-4 h-4" />
               </button>
             </div>
             </>
@@ -1099,7 +1106,7 @@ export const BusinessDashboard: React.FC = () => {
                       <div>
                         <div className="flex items-center gap-2 mb-1">
                           <h4 className="font-display font-black text-2xl">
-                            {selectedPlanType === 'recommended' ? 'Recommended Plan' : `${activePlan?.type?.toUpperCase()} Plan Preview`}
+                            {selectedPlanType === 'recommended' ? t('shipper.recommendedPlan', 'Recommended Plan') : `${activePlan?.type?.toUpperCase()} Plan Preview`}
                           </h4>
                           {selectedPlanType !== 'recommended' && (
                             <span className="bg-amber-400/20 text-amber-300 border border-amber-400/30 px-2 py-0.5 rounded text-[10px] font-mono font-bold uppercase">
@@ -1113,18 +1120,18 @@ export const BusinessDashboard: React.FC = () => {
                       </div>
                       {activePlan?.slaStatus === 'compliant' || activePlan?.slaStatus === 'ok' ? (
                         <span className="bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 px-3 py-1 rounded-md font-mono text-[10px] font-bold uppercase tracking-widest flex items-center gap-1.5">
-                          <ShieldCheck className="w-3 h-3"/> SLA Compliant
+                          <ShieldCheck className="w-3 h-3"/> {t('shipper.slaCompliant', 'SLA Compliant')}
                         </span>
                       ) : null}
                     </div>
                     
                     <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-6">
                       <div>
-                        <span className="block text-[10px] font-mono text-white/50 uppercase tracking-widest mb-1">Cost</span>
+                        <span className="block text-[10px] font-mono text-white/50 uppercase tracking-widest mb-1">{t('shipper.cost', 'Cost')}</span>
                         <span className="font-display font-bold text-xl">₹{Math.round(activePlan?.cost || 0).toLocaleString()}</span>
                       </div>
                       <div>
-                        <span className="block text-[10px] font-mono text-white/50 uppercase tracking-widest mb-1">Est. Departure</span>
+                        <span className="block text-[10px] font-mono text-white/50 uppercase tracking-widest mb-1">{t('shipper.estDeparture', 'Est. Departure')}</span>
                         <span className="font-bold">
                           {activePlan?.eta && !isNaN(new Date(activePlan.eta).getTime())
                             ? new Date(activePlan.eta).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})
@@ -1132,11 +1139,11 @@ export const BusinessDashboard: React.FC = () => {
                         </span>
                       </div>
                       <div>
-                        <span className="block text-[10px] font-mono text-white/50 uppercase tracking-widest mb-1">Transit Time</span>
+                        <span className="block text-[10px] font-mono text-white/50 uppercase tracking-widest mb-1">{t('shipper.transitTime', 'Transit Time')}</span>
                         <span className="font-bold">{(activePlan?.transitTimeHours || activePlan?.durationHours)?.toFixed(1)} hrs</span>
                       </div>
                       <div>
-                        <span className="block text-[10px] font-mono text-white/50 uppercase tracking-widest mb-1">Capacity Util.</span>
+                        <span className="block text-[10px] font-mono text-white/50 uppercase tracking-widest mb-1">{t('shipper.capacityUtil', 'Capacity Util.')}</span>
                         <span className="font-bold">{activePlan?.capacityUtilization || aiPlanResults.recommendedPlan?.capacityUtilization || 85}%</span>
                       </div>
                     </div>
@@ -1152,15 +1159,15 @@ export const BusinessDashboard: React.FC = () => {
                     <div className="flex items-center gap-2">
                       {hasRail && hasRoad ? (
                         <span className="bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 px-2.5 py-0.5 rounded font-mono text-[11px] font-bold uppercase tracking-wider flex items-center gap-1.5">
-                          🚂 🚛 Multimodal (Rail + Road)
+                          🚂 🚛 {t('shipper.multimodalBadge', 'Multimodal (Rail + Road)')}
                         </span>
                       ) : hasRail ? (
                         <span className="bg-blue-500/20 text-blue-300 border border-blue-500/30 px-2.5 py-0.5 rounded font-mono text-[11px] font-bold uppercase tracking-wider flex items-center gap-1.5">
-                          🚂 Rail Cold Wagon
+                          🚂 {t('shipper.railBadge', 'Rail Cold Wagon')}
                         </span>
                       ) : (
                         <span className="bg-[#5C7A50]/30 text-green-300 border border-[#5C7A50]/50 px-2.5 py-0.5 rounded font-mono text-[11px] font-bold uppercase tracking-wider flex items-center gap-1.5">
-                          🚛 Road Reefer
+                          🚛 {t('shipper.roadBadge', 'Road Reefer')}
                         </span>
                       )}
                     </div>
@@ -1198,12 +1205,12 @@ export const BusinessDashboard: React.FC = () => {
                     {/* Consolidation Details */}
                     {activePlan?.shipmentCount && (
                       <div className="bg-emerald-50/50 border border-emerald-100 rounded-xl p-4 shadow-sm mb-2">
-                        <h6 className="font-bold text-emerald-800 mb-3 flex items-center gap-2">📦 CONSOLIDATED CLUSTER DETAILS</h6>
+                        <h6 className="font-bold text-emerald-800 mb-3 flex items-center gap-2">📦 {t('shipper.clusterDetailsTitle', 'CONSOLIDATED CLUSTER DETAILS')}</h6>
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm text-gray-700">
-                          <div>Your Cargo: <span className="font-bold text-gray-900">{newCargo.weightKg || 1000} kg</span></div>
-                          <div>Total Consolidated Load: <span className="font-bold text-gray-900">{activePlan.totalCargoWeight} kg</span></div>
-                          <div>Vehicle Capacity: <span className="font-bold text-gray-900">{activePlan.vehicleMaxCapacity} kg</span></div>
-                          <div>Shipments in Cluster: <span className="font-bold text-gray-900">{activePlan.shipmentCount}</span></div>
+                          <div>{t('shipper.yourCargo', 'Your Cargo')}: <span className="font-bold text-gray-900">{newCargo.weightKg || 1000} kg</span></div>
+                          <div>{t('shipper.totalLoad', 'Total Consolidated Load')}: <span className="font-bold text-gray-900">{activePlan.totalCargoWeight} kg</span></div>
+                          <div>{t('shipper.vehicleCapacity', 'Vehicle Capacity')}: <span className="font-bold text-gray-900">{activePlan.vehicleMaxCapacity} kg</span></div>
+                          <div>{t('shipper.shipmentsInCluster', 'Shipments in Cluster')}: <span className="font-bold text-gray-900">{activePlan.shipmentCount}</span></div>
                         </div>
                       </div>
                     )}
@@ -1212,7 +1219,7 @@ export const BusinessDashboard: React.FC = () => {
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                        <div className="bg-white border border-[#E5EBE3] p-4 rounded-xl shadow-sm">
                          <div className="flex justify-between items-center mb-2">
-                           <span className="text-xs font-bold text-gray-700 uppercase tracking-wide">Predicted Delay Risk</span>
+                           <span className="text-xs font-bold text-gray-700 uppercase tracking-wide">{t('shipper.delayRisk', 'Predicted Delay Risk')}</span>
                            <span className="text-xs font-bold text-amber-600">
                              {(activePlan?.delayProbability || activePlan?.delayRisk?.score || 0).toFixed(1)}%
                            </span>
@@ -1223,7 +1230,7 @@ export const BusinessDashboard: React.FC = () => {
                        </div>
                        <div className="bg-white border border-[#E5EBE3] p-4 rounded-xl shadow-sm">
                          <div className="flex justify-between items-center mb-2">
-                           <span className="text-xs font-bold text-gray-700 uppercase tracking-wide">Predicted Spoilage Risk</span>
+                           <span className="text-xs font-bold text-gray-700 uppercase tracking-wide">{t('shipper.spoilageRisk', 'Predicted Spoilage Risk')}</span>
                            <span className="text-xs font-bold text-red-600">
                              {(activePlan?.spoilageProbability || activePlan?.spoilageRisk?.score || 0).toFixed(1)}%
                            </span>
@@ -1236,7 +1243,7 @@ export const BusinessDashboard: React.FC = () => {
 
                     {/* Why this plan? */}
                     <div className="bg-gradient-to-br from-[#F8FAF7] to-green-50 border border-green-200 rounded-xl p-5 shadow-sm">
-                      <h5 className="font-bold text-[#163832] mb-2 flex items-center gap-2"><Sparkles className="w-4 h-4 text-[#5C7A50]" /> WHY THIS PLAN?</h5>
+                      <h5 className="font-bold text-[#163832] mb-2 flex items-center gap-2"><Sparkles className="w-4 h-4 text-[#5C7A50]" /> {t('shipper.whyThisPlan', 'WHY THIS PLAN?')}</h5>
                       <p className="text-sm text-gray-700 leading-relaxed font-medium">
                         {activePlan?.explanation?.multimodalAdvantage || activePlan?.explanation?.departureReasoning || activePlan?.explanation?.summary || 'The AI Engine determined this is the mathematically optimal consolidation route prioritizing SLA compliance and cost reduction.'}
                       </p>
@@ -1249,9 +1256,9 @@ export const BusinessDashboard: React.FC = () => {
                       <h5 className="font-bold text-[#163832] mb-3 text-sm flex items-center justify-between border-b border-[#E5EBE3] pb-2">
                         <span className="flex items-center gap-2">
                           <Layers className="w-4 h-4 text-[#596560]" />
-                          Alternative Plans Comparison
+                          {t('shipper.altPlansTitle', 'Alternative Plans Comparison')}
                         </span>
-                        <span className="text-[11px] font-mono text-[#596560]">Click any plan to preview route on map</span>
+                        <span className="text-[11px] font-mono text-[#596560]">{t('shipper.altPlansHint', 'Click any plan to preview route on map')}</span>
                       </h5>
                       <div className="overflow-x-auto bg-white rounded-xl shadow-sm border border-[#E5EBE3]">
                         <table className="w-full text-left text-sm border-collapse">
@@ -1323,46 +1330,46 @@ export const BusinessDashboard: React.FC = () => {
                 {/* What-If Engine Sandbox */}
                 <div className="bg-white border-t border-[#D6DCD4] p-6 shadow-[0_-4px_10px_-5px_rgba(0,0,0,0.05)] z-10 relative">
                   <h5 className="font-display font-bold text-[#163832] mb-4 flex items-center gap-2">
-                    <Sparkles className="w-4 h-4 text-[#D98E2B]" /> What-If AI Scenarios
+                    <Sparkles className="w-4 h-4 text-[#D98E2B]" /> {t('shipper.whatIfTitle', 'What-If AI Scenarios')}
                   </h5>
                   
                   {previousAiPlanResults && previousAiPlanResults.recommendedPlan?.id !== aiPlanResults.recommendedPlan?.id && (
                     <div className="mb-5 bg-gradient-to-r from-[#163832] to-[#2A4C46] text-white p-4 rounded-xl shadow-lg border border-[#5C7A50]">
-                      <h6 className="font-mono text-[10px] font-bold text-[#D98E2B] uppercase tracking-widest mb-2">Engine Output Changed</h6>
+                      <h6 className="font-mono text-[10px] font-bold text-[#D98E2B] uppercase tracking-widest mb-2">{t('shipper.engineOutputChanged', 'Engine Output Changed')}</h6>
                       <div className="grid grid-cols-2 gap-4 items-center">
                         <div>
-                          <div className="text-xs text-white/70 mb-0.5">Previous Route</div>
+                          <div className="text-xs text-white/70 mb-0.5">{t('shipper.previousRoute', 'Previous Route')}</div>
                           <div className="font-bold text-lg line-through text-white/50">{previousAiPlanResults.recommendedPlan?.vehicle} Route</div>
                           <div className="font-mono text-sm text-white/50">₹{Math.round(previousAiPlanResults.recommendedPlan?.cost || 0).toLocaleString()}</div>
                         </div>
                         <div>
-                          <div className="text-xs text-white/70 mb-0.5">New Recommended Route</div>
+                          <div className="text-xs text-white/70 mb-0.5">{t('shipper.newRecommendedRoute', 'New Recommended Route')}</div>
                           <div className="font-bold text-lg text-emerald-400">{aiPlanResults.recommendedPlan?.vehicle} Route</div>
                           <div className="font-mono text-sm text-emerald-400">₹{Math.round(aiPlanResults.recommendedPlan?.cost || 0).toLocaleString()}</div>
                         </div>
                       </div>
                       <div className="mt-3 bg-black/20 p-2 rounded text-xs text-gray-300 font-medium">
-                        <strong>Why it changed:</strong> {aiPlanResults.recommendedPlan?.explanation?.engineStrategy}
+                        <strong>{t('shipper.whyChanged', 'Why it changed:')}</strong> {aiPlanResults.recommendedPlan?.explanation?.engineStrategy}
                       </div>
                     </div>
                   )}
 
                   <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-end">
                     <div className="md:col-span-5">
-                      <label className="block text-xs font-bold text-gray-700 mb-1.5 uppercase tracking-wider">Optimization Target</label>
+                      <label className="block text-xs font-bold text-gray-700 mb-1.5 uppercase tracking-wider">{t('shipper.optTarget', 'Optimization Target')}</label>
                       <select 
                         value={whatIfPreference}
                         onChange={(e) => setWhatIfPreference(e.target.value)}
                         className="w-full bg-[#F8FAF7] border border-[#D6DCD4] rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-[#5C7A50] text-sm"
                       >
-                        <option value="balanced">Balanced (Cost vs Risk)</option>
-                        <option value="lowest_cost">Aggressive Lowest Cost</option>
-                        <option value="fastest">Fastest Speed (Minimize Delay)</option>
-                        <option value="safest">Safest (Minimize Spoilage)</option>
+                        <option value="balanced">{t('shipper.optBalanced', 'Balanced (Cost vs Risk)')}</option>
+                        <option value="lowest_cost">{t('shipper.optLowestCost', 'Aggressive Lowest Cost')}</option>
+                        <option value="fastest">{t('shipper.optFastest', 'Fastest Speed (Minimize Delay)')}</option>
+                        <option value="safest">{t('shipper.optSafest', 'Safest (Minimize Spoilage)')}</option>
                       </select>
                     </div>
                     <div className="md:col-span-4">
-                      <label className="block text-xs font-bold text-gray-700 mb-1.5 uppercase tracking-wider">Override Max SLA (hrs)</label>
+                      <label className="block text-xs font-bold text-gray-700 mb-1.5 uppercase tracking-wider">{t('shipper.overrideSLA', 'Override Max SLA (hrs)')}</label>
                       <input 
                         type="number" 
                         placeholder="e.g. 24"
@@ -1375,7 +1382,7 @@ export const BusinessDashboard: React.FC = () => {
                       <button 
                         onClick={handleRecalculatePlan}
                         disabled={isRecalculating}
-                        className={`w-full px-4 py-2.5 rounded-lg font-bold shadow transition-all flex items-center justify-center gap-2 overflow-hidden relative ${
+                        className={`w-full px-4 py-2.5 rounded-lg font-bold shadow transition-all flex items-center justify-center gap-2 overflow-hidden relative cursor-pointer ${
                           isRecalculating 
                             ? 'bg-gradient-to-r from-[#163832] via-[#2D6A4F] to-[#163832] bg-[length:200%_100%] animate-[pulse_1.5s_ease-in-out_infinite] cursor-wait text-emerald-100 shadow-[0_0_15px_rgba(45,106,79,0.4)] border border-emerald-500/30' 
                             : 'bg-[#596560] hover:bg-[#1A211E] text-white'
@@ -1384,11 +1391,11 @@ export const BusinessDashboard: React.FC = () => {
                         {isRecalculating ? (
                           <>
                             <div className="w-4 h-4 border-2 border-emerald-300/30 border-t-emerald-300 rounded-full animate-spin relative z-10"></div>
-                            <span className="relative z-10 font-mono tracking-wide text-xs uppercase">Simulating</span>
+                            <span className="relative z-10 font-mono tracking-wide text-xs uppercase">{t('shipper.simulating', 'Simulating')}</span>
                             <div className="absolute inset-0 bg-white/5 opacity-50 bg-[repeating-linear-gradient(45deg,transparent,transparent_10px,rgba(255,255,255,0.1)_10px,rgba(255,255,255,0.1)_20px)]"></div>
                           </>
                         ) : (
-                          <><Layers className="w-4 h-4" /> Recalculate</>
+                          <><Layers className="w-4 h-4" /> {t('shipper.recalculate', 'Recalculate')}</>
                         )}
                       </button>
                     </div>
@@ -1397,11 +1404,11 @@ export const BusinessDashboard: React.FC = () => {
 
                 {/* Footer Actions */}
                 <div className="p-5 border-t border-gray-200 flex justify-end gap-3 bg-white mt-auto">
-                  <button onClick={closeNewModal} className="px-5 py-3 text-gray-600 hover:bg-gray-100 rounded-xl font-bold transition-colors">
-                    Cancel Request
+                  <button onClick={closeNewModal} className="px-5 py-3 text-gray-600 hover:bg-gray-100 rounded-xl font-bold transition-colors cursor-pointer">
+                    {t('shipper.cancelRequest', 'Cancel Request')}
                   </button>
-                  <button onClick={() => confirmAiPlan(selectedPlanType)} className="px-6 py-3 bg-[#D98E2B] hover:bg-[#C27E25] text-white rounded-xl font-bold shadow-md flex items-center gap-2 transition-transform hover:-translate-y-0.5">
-                    <CheckCircle2 className="w-5 h-5" /> Confirm AI Plan (₹{Math.round(
+                  <button onClick={() => confirmAiPlan(selectedPlanType)} className="px-6 py-3 bg-[#D98E2B] hover:bg-[#C27E25] text-white rounded-xl font-bold shadow-md flex items-center gap-2 transition-transform hover:-translate-y-0.5 cursor-pointer">
+                    <CheckCircle2 className="w-5 h-5" /> {t('shipper.confirmPlan', 'Confirm AI Plan')} (₹{Math.round(
                       (selectedPlanType === 'recommended' || !selectedPlanType 
                         ? aiPlanResults?.recommendedPlan?.cost 
                         : (aiPlanResults?.candidatePlans?.find((p: any) => p.type === selectedPlanType)?.cost || aiPlanResults?.recommendedPlan?.cost)
@@ -1415,6 +1422,9 @@ export const BusinessDashboard: React.FC = () => {
           </div>
         </div>
       )}
+
+      {/* Floating Chatbot for Shipper */}
+      <KarwaanChatbot role="shipper" contextData={{ selectedShipment, myShipments }} />
     </div>
   );
   

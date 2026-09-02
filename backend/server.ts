@@ -12,6 +12,7 @@ import incidentsRoutes from './routes/incidents';
 import recommendationsRoutes from './routes/recommendations';
 import vehiclesRoutes from './routes/vehicles';
 import hubsRoutes from './routes/hubs';
+import chatRoutes from './routes/chat';
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -34,6 +35,7 @@ app.use('/api/incidents', incidentsRoutes);
 app.use('/api/recommendations', recommendationsRoutes);
 app.use('/api/vehicles', vehiclesRoutes);
 app.use('/api/hubs', hubsRoutes);
+app.use('/api/chat', chatRoutes);
 
 // Error Handling (Must be last)
 app.use(errorHandler);
